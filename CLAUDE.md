@@ -127,6 +127,8 @@ machine     Xtensa,     drivers     abstraction
 
 - `src/rtos/` — RTOS-aware debugging (FreeRTOS, ThreadX, uCOS, etc.). Hooks into the target layer to provide thread-aware backtraces.
 
+- `src/pld/` — Programmable logic device support (FPGA/CPLD). Handles JTAG-based bitstream loading and (X)SVF playback.
+
 - `tcl/` — Tcl configuration scripts for boards (`tcl/board/`), interfaces (`tcl/interface/`), and targets (`tcl/target/`). These are the `.cfg` files users pass with `-f`.
 
 - `jimtcl/` — Git submodule: embedded Jim Tcl interpreter used for all scripting.

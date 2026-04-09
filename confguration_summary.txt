@@ -1,0 +1,49 @@
+OpenOCD configuration summary
+---------------------------------------------------
+MPSSE mode of FTDI based devices                 yes
+cJTAG (OScan1, JScan3) tunneled thru MPSSE       yes (auto)
+CH347 based devices                              yes (auto)
+ST-Link Programmer                               yes (auto)
+TI ICDI JTAG Programmer                          yes (auto)
+Keil ULINK JTAG Programmer                       yes (auto)
+ANGIE Adapter                                    yes (auto)
+Altera USB-Blaster II Compatible                 yes (auto)
+Bitbang mode of FT232R based devices             yes (auto)
+Versaloon-Link JTAG Programmer                   yes (auto)
+TI XDS110 Debug Probe                            yes (auto)
+OSBDM (JTAG only) Programmer                     yes (auto)
+eStick/opendous JTAG Programmer                  yes (auto)
+Olimex ARM-JTAG-EW Programmer                    yes (auto)
+Raisonance RLink JTAG Programmer                 yes (auto)
+USBProg JTAG Programmer                          yes (auto)
+Espressif JTAG Programmer                        yes (auto)
+CMSIS-DAP v2 compliant dongle (USB bulk)         yes (auto)
+CMSIS-DAP v1 compliant dongle (HID)              yes
+Nu-Link Programmer                               yes (auto)
+Cypress KitProg Programmer                       yes (auto)
+Altera USB-Blaster Compatible                    yes (auto)
+ASIX Presto Adapter                              yes (auto)
+OpenJTAG Adapter                                 yes (auto)
+Linux GPIO bitbang through libgpiod              no
+CoreSight Direct Memory                          no
+Linux GPIO bitbang through sysfs                 no
+Remote Bitbang driver                            yes
+SEGGER J-Link Programmer                         yes
+Xilinx XVC PCIe and AXI drives                   no
+Bus Pirate                                       no
+PC Parallel Port                                 no
+Linux spidev driver                              no
+Cadence Virtual Debug Interface                  yes (auto)
+JTAG DPI Adapter                                 yes (auto)
+JTAG VPI Adapter                                 yes (auto)
+BlueField SoC via rshim                          no
+Amontec JTAG-Accelerator driver                  no
+Bitbanging on EP93xx-based SBCs                  no
+Bitbanging on AT91RM9200-based SBCs              no
+Bitbanging on BCM2835 (as found in Raspberry Pi) no
+Bitbanging on NXP IMX processors                 no
+Bitbanging on AM335x (as found in Beaglebones)   no
+CMSIS-DAP v2 compliant dongle (TCP)              yes (auto)
+Dummy Adapter                                    yes (auto)
+Use Capstone disassembly framework               yes (auto)
+Collect coverage using gcov                      no
