@@ -1410,7 +1410,7 @@ static int fpr_read_progbuf(struct target *target, uint64_t *value,
 	if (riscv_program_exec(&program, target) != ERROR_OK)
 		return ERROR_FAIL;
 
-	return register_read_abstract(target, value, GDB_REGNO_S0) != ERROR_OK;
+	return register_read_abstract(target, value, GDB_REGNO_S0);
 }
 
 static int csr_read_progbuf(struct target *target, uint64_t *value,
@@ -1429,7 +1429,7 @@ static int csr_read_progbuf(struct target *target, uint64_t *value,
 	if (riscv_program_exec(&program, target) != ERROR_OK)
 		return ERROR_FAIL;
 
-	return register_read_abstract(target, value, GDB_REGNO_S0) != ERROR_OK;
+	return register_read_abstract(target, value, GDB_REGNO_S0);
 }
 
 /**
@@ -1616,7 +1616,8 @@ static int register_write_direct(struct target *target, enum gdb_regno number,
 
 	int result = register_write_abstract(target, number, value);
 
-	if (result != ERROR_OK && target->state == TARGET_HALTED)
+	if (result != ERROR_OK && target->state == TARGET_HALTED
+			&& riscv_progbuf_size(target) > 0)
 		result = register_write_progbuf(target, number, value);
 
 	if (cleanup_after_register_access(target, mstatus, number) != ERROR_OK)
@@ -1645,7 +1646,8 @@ static int register_read_direct(struct target *target, riscv_reg_t *value,
 
 	int result = register_read_abstract(target, value, number);
 
-	if (result != ERROR_OK && target->state == TARGET_HALTED)
+	if (result != ERROR_OK && target->state == TARGET_HALTED
+			&& riscv_progbuf_size(target) > 0)
 		result = register_read_progbuf(target, value, number);
 
 	if (cleanup_after_register_access(target, mstatus, number) != ERROR_OK)
