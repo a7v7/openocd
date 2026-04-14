@@ -107,6 +107,14 @@ static int assume_reg_exist(struct target *target, uint32_t regno)
 static int examine_xlen(struct target *target)
 {
 	RISCV_INFO(r);
+
+	if (r->forced_xlen != 0) {
+		LOG_TARGET_DEBUG(target, "XLEN forced to %u, skipping auto-detection.",
+				r->forced_xlen);
+		r->xlen = r->forced_xlen;
+		return ERROR_OK;
+	}
+
 	unsigned int cmderr;
 
 	const uint32_t command = riscv013_access_register_command(target,

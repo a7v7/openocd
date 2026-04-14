@@ -4375,6 +4375,26 @@ COMMAND_HANDLER(riscv_set_mem_access)
 	return ERROR_OK;
 }
 
+COMMAND_HANDLER(riscv_set_xlen)
+{
+	struct target *target = get_current_target(CMD_CTX);
+	RISCV_INFO(r);
+
+	if (CMD_ARGC != 1) {
+		command_print(CMD, "Command takes exactly 1 argument: 32 or 64");
+		return ERROR_COMMAND_ARGUMENT_INVALID;
+	}
+
+	unsigned int xlen;
+	COMMAND_PARSE_NUMBER(uint, CMD_ARGV[0], xlen);
+	if (xlen != 32 && xlen != 64) {
+		LOG_ERROR("Unsupported XLEN value %u. Must be 32 or 64.", xlen);
+		return ERROR_COMMAND_ARGUMENT_INVALID;
+	}
+
+	r->forced_xlen = xlen;
+	return ERROR_OK;
+}
 
 static bool parse_csr_address(const char *reg_address_str, unsigned int *reg_addr)
 {
@@ -5626,6 +5646,17 @@ static const struct command_registration riscv_exec_command_handlers[] = {
 		.usage = "method1 [method2] [method3]",
 		.help = "Set which memory access methods shall be used and in which order "
 			"of priority. Method can be one of: 'progbuf', 'sysbus' or 'abstract'."
+	},
+	{
+		.name = "set_xlen",
+		.handler = riscv_set_xlen,
+		.mode = COMMAND_CONFIG,
+		.usage = "xlen",
+		.help = "Force XLEN to the given value (32 or 64) instead of "
+			"auto-detecting it. Use this for targets whose DM incorrectly "
+			"accepts 64-bit abstract commands on a 32-bit core without "
+			"returning cmderr=2, violating Debug Spec 0.13 section 3.5.1. "
+			"Must be called before `init`."
 	},
 	{
 		.name = "expose_csrs",

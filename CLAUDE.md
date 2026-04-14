@@ -140,3 +140,28 @@ machine     Xtensa,     drivers     abstraction
 **Command registration pattern:** Subsystems register commands with `COMMAND_REGISTRATION` macros and `register_commands()`. Handlers use `COMMAND_HANDLER` / `COMMAND_HELPER` macros with `CMD_ARGC`/`CMD_ARGV`.
 
 **New documentation** for commands must be added to `doc/openocd.texi` in the same commit that adds the command.
+
+## Trilinear RV32-IM Target (Custom Work)
+
+This repo contains a custom target configuration for the Trilinear RV32-IM core at `tcl/target/trilinear/riscv_rv32-im.cfg`. The current branch (`no-progbuf-fix`) patches OpenOCD to handle a defect in this core.
+
+**Known hardware defects this config works around:**
+
+1. **TDO-sticky bug** — After the IDCODE DR is shifted out, TDO bits stick, breaking OpenOCD's automatic scan-chain validation (`jtag arp_init` / `jtag arp_init-reset`). Fixed by overriding `jtag_init` with a manual IDCODE read via `irscan`/`drscan`.
+
+2. **No program buffer (`progbufsize=0`)** — The DM has no progbuf. Memory access must be forced to abstract-commands-only: `$_TARGETNAME riscv set_mem_access abstract`.
+
+3. **No FPU, but OpenOCD probes FP CSRs** — Even with `progbufsize=0`, the examine logic tries to read FP CSRs (0x001–0x003) via the program buffer, producing a spurious error that aborts examine. Fixed with `$_TARGETNAME riscv hide_csrs 0x001-0x003` (must be called at config stage, before `init`).
+
+**To use this target:**
+
+```bash
+openocd -f interface/jlink.cfg -f target/trilinear/riscv_rv32-im.cfg
+```
+
+**Key RISC-V source files for debugging the above issues:**
+- `src/target/riscv/riscv-013.c` — DM 0.13 implementation, examine logic, abstract command execution
+- `src/target/riscv/riscv.c` — Architecture-agnostic RISC-V layer, `hide_csrs`, `set_mem_access`
+- `src/target/riscv/riscv_reg.c` — Register access, where FP CSR probing originates
+
+**RISC-V JTAG IR values (Debug Spec 0.13 §6.1):** IDCODE=0x01, DTMCS=0x10, DMI=0x11, BYPASS=0x1F. IRlen for this core is 5 bits; expected IDCODE is `0x15150DBB`.

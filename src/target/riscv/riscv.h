@@ -178,6 +178,12 @@ struct riscv_info {
 
 	/* It's possible that each core has a different supported ISA set. */
 	int xlen;
+	/* If non-zero, skip the XLEN auto-detection probe in examine_xlen() and
+	 * use this value instead.  Needed for DMs that incorrectly accept 64-bit
+	 * abstract commands on a 32-bit core (violating Debug Spec 0.13 §3.5.1),
+	 * which causes examine_xlen() to conclude XLEN=64.
+	 * Set via `riscv set_xlen` in the target config file. */
+	unsigned int forced_xlen;
 	/* TODO: use the value from the register cache instead. */
 	riscv_reg_t misa;
 	/* TODO: use the value from the register cache instead.

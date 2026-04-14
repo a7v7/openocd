@@ -1,1 +1,4 @@
 claude --resume ffc5aa77-51f5-42f2-aa9a-4c54d0b0a29e
+claude --resume ffc5aa77-51f5-42f2-aa9a-4c54d0b0a29e
+claude --resume c77b9ba3-b863-4176-a003-bada1b1e9977 [Claude code]
+
