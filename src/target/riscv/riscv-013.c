@@ -3869,6 +3869,12 @@ write_memory_abstract(struct target *target, const struct riscv_mem_access_args 
 	uint32_t command = access_memory_command(target, /* virtual = */ false,
 			width, /* postincrement = */ true, /* is_write = */ true);
 	bool use_aampostincrement = !is_command_unsupported(target, command);
+	RISCV_INFO(r);
+	if (r->write_no_postincrement)
+		/* `riscv set_write_postincrement off`: the DM accepts the
+		 * post-increment but steps the address wrongly, so write every
+		 * word with its own address. */
+		use_aampostincrement = false;
 	if (!use_aampostincrement)
 		/* It is already known that this abstract memory
 		 * access with aampostincrement=1 is not supported.

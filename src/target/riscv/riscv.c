@@ -4396,6 +4396,24 @@ COMMAND_HANDLER(riscv_set_xlen)
 	return ERROR_OK;
 }
 
+COMMAND_HANDLER(riscv_set_write_postincrement)
+{
+	struct target *target = get_current_target(CMD_CTX);
+	RISCV_INFO(r);
+
+	if (CMD_ARGC == 0) {
+		command_print(CMD, "%s", r->write_no_postincrement ? "off" : "on");
+		return ERROR_OK;
+	}
+	if (CMD_ARGC != 1)
+		return ERROR_COMMAND_SYNTAX_ERROR;
+
+	bool on;
+	COMMAND_PARSE_ON_OFF(CMD_ARGV[0], on);
+	r->write_no_postincrement = !on;
+	return ERROR_OK;
+}
+
 static bool parse_csr_address(const char *reg_address_str, unsigned int *reg_addr)
 {
 	*reg_addr = -1;
@@ -5657,6 +5675,16 @@ static const struct command_registration riscv_exec_command_handlers[] = {
 			"accepts 64-bit abstract commands on a 32-bit core without "
 			"returning cmderr=2, violating Debug Spec 0.13 section 3.5.1. "
 			"Must be called before `init`."
+	},
+	{
+		.name = "set_write_postincrement",
+		.handler = riscv_set_write_postincrement,
+		.mode = COMMAND_ANY,
+		.usage = "[on|off]",
+		.help = "Show or set whether abstract memory writes may use "
+			"aampostincrement (default on). 'off' writes every word with "
+			"its own address: for DMs that accept the post-increment but "
+			"step the address by the wrong amount."
 	},
 	{
 		.name = "expose_csrs",

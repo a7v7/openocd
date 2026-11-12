@@ -184,6 +184,13 @@ struct riscv_info {
 	 * which causes examine_xlen() to conclude XLEN=64.
 	 * Set via `riscv set_xlen` in the target config file. */
 	unsigned int forced_xlen;
+	/* If true, abstract memory writes never use aampostincrement: every word
+	 * is written with its own address in data1.  Needed for DMs that accept
+	 * aampostincrement but step the address by the wrong amount (the
+	 * Trilinear RV32-IM DM steps 8 bytes for aamsize=2), which the "command
+	 * not supported" fallback cannot catch.
+	 * Set via `riscv set_write_postincrement off`. */
+	bool write_no_postincrement;
 	/* TODO: use the value from the register cache instead. */
 	riscv_reg_t misa;
 	/* TODO: use the value from the register cache instead.
