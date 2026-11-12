@@ -4679,8 +4679,14 @@ static int write_memory_bus_v1(struct target *target, const struct riscv_mem_acc
 	assert(riscv_mem_access_is_write(args));
 
 	RISCV013_INFO(info);
+	RISCV_INFO(r);
+	/* `riscv set_write_postincrement off`: some DMs step sbaddress wrongly
+	 * with sbautoincrement (the Trilinear RV32-IM DM steps 8 bytes for 32-bit
+	 * writes).  Then write sbaddress0 before every word instead, in the same
+	 * batch.  Addresses above 32 bits are not handled on that path. */
+	const bool per_word_address = r->write_no_postincrement;
 	uint32_t sbcs = sb_sbaccess(args.size);
-	sbcs = set_field(sbcs, DM_SBCS_SBAUTOINCREMENT, 1);
+	sbcs = set_field(sbcs, DM_SBCS_SBAUTOINCREMENT, per_word_address ? 0 : 1);
 	dm_write(target, DM_SBCS, sbcs);
 
 	target_addr_t next_address = args.address;
@@ -4697,12 +4703,17 @@ static int write_memory_bus_v1(struct target *target, const struct riscv_mem_acc
 		struct riscv_batch *batch = riscv_batch_alloc(target, RISCV_BATCH_ALLOC_SIZE);
 		if (!batch)
 			return ERROR_FAIL;
+		const target_addr_t burst_address = next_address;
 
 		for (uint32_t i = (next_address - args.address) / args.size; i < args.count; i++) {
 			const uint8_t *p = args.write_buffer + i * args.size;
 
-			if (riscv_batch_available_scans(batch) < (args.size + 3) / 4)
+			if (riscv_batch_available_scans(batch) < (args.size + 3) / 4 + (per_word_address ? 1 : 0))
 				break;
+
+			if (per_word_address)
+				riscv_batch_add_dm_write(batch, DM_SBADDRESS0, (uint32_t)next_address, false,
+						RISCV_DELAY_BASE);
 
 			uint32_t sbvalue[4] = { 0 };
 			if (args.size > 12) {
@@ -4771,7 +4782,13 @@ static int write_memory_bus_v1(struct target *target, const struct riscv_mem_acc
 
 		if (get_field(sbcs, DM_SBCS_SBBUSYERROR) || dmi_busy_encountered) {
 			/* Recover from the case when the write commands were issued too fast.
-			 * Determine the address from which to resume writing. */
+			 * Determine the address from which to resume writing.  Without
+			 * sbautoincrement sbaddress does not track progress: write the
+			 * whole burst again (rewriting a word is harmless). */
+			if (per_word_address) {
+				next_address = burst_address;
+				continue;
+			}
 			next_address = sb_read_address(target);
 			if (next_address < args.address) {
 				/* This should never happen, probably buggy hardware. */
